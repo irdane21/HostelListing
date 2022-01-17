@@ -1,7 +1,9 @@
+using HostelListing.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,8 +28,10 @@ namespace HostelListing
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("sqlConnection"))
 
-            services.AddControllers();
+            );
 
             services.AddCors(p => {
                 p.AddPolicy("CorsPolicy", builder =>
@@ -40,6 +44,8 @@ namespace HostelListing
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HostelListing", Version = "v1" });
             });
+
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
