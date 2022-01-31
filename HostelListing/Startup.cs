@@ -1,3 +1,4 @@
+using HostelListing.Configurations;
 using HostelListing.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,7 +40,7 @@ namespace HostelListing
                     .AllowAnyMethod()
                     .AllowAnyHeader());
             });
-
+            services.AddAutoMapper(typeof(MapperInitializer));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HostelListing", Version = "v1" });
