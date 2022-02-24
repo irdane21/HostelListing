@@ -17,23 +17,26 @@ namespace HostelListing.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApiUser> _userManager;
-        private readonly SignInManager<ApiUser> _signInManager;
+        /*private readonly SignInManager<ApiUser> _signInManager;*/
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
 
         public AccountController(UserManager<ApiUser> userManager,
-            SignInManager<ApiUser> signInManager,
+            /*SignInManager<ApiUser> signInManager,*/
             ILogger<AccountController> logger,
             IMapper mapper
             )
         {
             _userManager = userManager;
-            _signInManager = signInManager;
+            /*_signInManager = signInManager;*/
             _logger = logger;
             _mapper = mapper;
         }
 
         [HttpPost]
+        [Route("register")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
         {
             _logger.LogInformation($"Registration Attempt for {userDTO.Email}");
@@ -44,11 +47,18 @@ namespace HostelListing.Controllers
             try
             {
                 var user = _mapper.Map<ApiUser>(userDTO);
+                user.UserName = userDTO.Email; 
                 var result = await _userManager.CreateAsync(user);
                 if (!result.Succeeded)
                 {
-                    return BadRequest($"User Registration Attempt Failed");
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(error.Code, error.Description);
+                    }
+                    return BadRequest(ModelState);
                 }
+
+                return Accepted();
             }
             catch (Exception ex)
             {
@@ -57,28 +67,30 @@ namespace HostelListing.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
+       /* [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginUserDTO userDTO)
         {
             _logger.LogInformation($"Loggin Attempt for {userDTO.Email}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
             try
             {
-                var user = _mapper.Map<ApiUser>(userDTO);
-                var result = await _userManager.CreateAsync(user);
+                var result = await _signInManager.PasswordSignInAsync(userDTO.Email, userDTO.Password, false, false);
                 if (!result.Succeeded)
                 {
-                    return BadRequest($"User Loggin Attempt Failed");
+                    return Unauthorized(userDTO);
                 }
+                return Accepted();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Something Went wrong in the {nameof(Register)}");
-                return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
+                _logger.LogError(ex, $"Something Went wrong in the {nameof(Login)}");
+                return Problem($"Something went wrong in the {nameof(Login)}", statusCode: 500);
             }
-        }
+        }*/
     }
 }
