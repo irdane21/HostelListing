@@ -48,7 +48,7 @@ namespace HostelListing.Controllers
             {
                 var user = _mapper.Map<ApiUser>(userDTO);
                 user.UserName = userDTO.Email; 
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user, userDTO.Password);
                 if (!result.Succeeded)
                 {
                     foreach (var error in result.Errors)
@@ -57,6 +57,7 @@ namespace HostelListing.Controllers
                     }
                     return BadRequest(ModelState);
                 }
+                await _userManager.AddToRoleAsync(user, userDTO.Roles);
 
                 return Accepted();
             }
@@ -67,7 +68,7 @@ namespace HostelListing.Controllers
             }
         }
 
-       /* [HttpPost]
+        /*[HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserDTO userDTO)
         {
