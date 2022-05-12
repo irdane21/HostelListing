@@ -2,6 +2,7 @@ using HostelListing.Configurations;
 using HostelListing.Data;
 using HostelListing.IRepository;
 using HostelListing.Repository;
+using HostelListing.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,7 +40,7 @@ namespace HostelListing
 
             services.AddAuthentication();
             services.ConfigureIdentity();
-
+            services.ConfigureJWT(Configuration);
             services.AddCors(p => {
                 p.AddPolicy("CorsPolicy", builder =>
                     builder.AllowAnyOrigin()
@@ -49,6 +50,7 @@ namespace HostelListing
             services.AddAutoMapper(typeof(MapperInitializer));
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAuthManager, AuthManager>();  
 
             services.AddSwaggerGen(c =>
             {
